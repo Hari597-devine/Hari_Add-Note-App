@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import apiClient from '../api/apiClient';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function Signup() {
   const { login } = useContext(AuthContext);
@@ -19,8 +20,12 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.username || !formData.email || !formData.password) {
+      return toast.error('Field cannot be empty');
+    }
     try {
       await apiClient.post('/auth/signup', formData);
+      toast.success('Successfully registration');
       const res = await apiClient.post('/auth/login', {
         identifier: formData.email,
         password: formData.password
@@ -28,8 +33,8 @@ export default function Signup() {
 
       login(res.data.token); // store token and redirect
     } catch (err) {
-         console.error(err.response?.data || err.message);
-      alert('Signup failed');
+      console.error(err.response?.data || err.message);
+      toast.error(err.response?.data?.error || 'Signup failed. Invalid user data.');
     }
   };
 

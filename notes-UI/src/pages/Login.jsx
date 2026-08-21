@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import { AuthContext } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function Login() {
   const { login } = useContext(AuthContext);
@@ -10,11 +11,15 @@ export default function Login() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    if (!identifier || !password) {
+      return toast.error('Field cannot be empty');
+    }
     try {
       const res = await apiClient.post('/auth/login', { identifier, password });
+      toast.success('Successfully logged in');
       login(res.data.token);
     } catch (err) {
-      alert('Login failed');
+      toast.error(err.response?.data?.error || 'Invalid user or password');
     }
   };
   return (
